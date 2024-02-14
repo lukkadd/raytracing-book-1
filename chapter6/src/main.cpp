@@ -1,9 +1,10 @@
 #include <iostream>
+#include <fstream>
+#include <cfloat>
+#include <stdlib.h>
 #include "sphere.hpp"
 #include "hitable_list.hpp"
 #include "camera.hpp"
-#include <cfloat>
-#include <stdlib.h>
 
 vec3 color(const ray& r, hitable *world) {
   hit_record rec;
@@ -18,11 +19,14 @@ vec3 color(const ray& r, hitable *world) {
 }
 
 int main (void){
+  std::fstream fs;
+  fs.open("./dist/image.ppm", std::fstream::out);
+ 
   int nx = 200;
   int ny = 100;
   int ns = 100;
 
-  std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+  fs << "P3\n" << nx << " " << ny << "\n255\n";
 
   hitable *list[2];
   list[0] = new sphere(vec3(0,0,-1), 0.5);
@@ -51,8 +55,10 @@ int main (void){
       int ig = int(255.99 * col[1]);
       int ib = int(255.99 * col[2]);
       
-      std::cout << ir << " " << ig << " " << ib << "\n";
+      fs << ir << " " << ig << " " << ib << "\n";
     }
   }
+
+  fs.close();
   return 0;
 }
