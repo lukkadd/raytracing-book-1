@@ -1,31 +1,39 @@
 #include <iostream>
-#include <stdlib.h>
 #include <fstream>
-#include "vec3.hpp"
 
-
-int main(void)
+int main()
 {
-  std::fstream fs;
-  fs.open("./dist/image.ppm", std::fstream::out);
-  
-  int nx = 200;
-  int ny = 100;
+	// Open file stream
+	std::ofstream fs("./dist/image.ppm");
 
-  fs << "P3\n" << nx << " " << ny << "\n255\n";
-  for (int j = ny - 1; j >= 0; j--)
-    {
-      for (int i = 0; i < nx; i++)
+	// Image
+
+	int image_width = 256;
+	int image_height = 256;
+
+	// Render
+
+	fs << "P3\n"
+	   << image_width << ' ' << image_height << "\n255\n";
+
+	for (int j = 0; j < image_height; ++j)
 	{
-	  vec3 col(float(i) / float(nx),float(j) / float(ny),0.2);
-	  int ir = int(255.99 * col[0]);
-	  int ig = int(255.99 * col[1]);
-	  int ib = int(255.99 * col[2]);
+		std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+		for (int i = 0; i < image_width; ++i)
+		{
+			auto r = double(i) / (image_width - 1);
+			auto g = double(j) / (image_height - 1);
+			auto b = 0;
 
-	  fs << ir << " " << ig << " " << ib << "\n";
+			int ir = static_cast<int>(255.999 * r);
+			int ig = static_cast<int>(255.999 * g);
+			int ib = static_cast<int>(255.999 * b);
+
+			fs << ir << ' ' << ig << ' ' << ib << '\n';
+		}
 	}
-    }
 
-  fs.close();
-  return 0;
+	fs.close();
+	std::clog << "\rDone.                 \n";
+	return 0;
 }

@@ -1,48 +1,35 @@
 #include <iostream>
-#include <stdlib.h>
 #include <fstream>
-#include "ray.hpp"
 
-//this function will simply apply a linear interpolation between blue and white based on the y coord
-vec3 color(const ray& r) {
-  vec3 unit_direction = unit_vector(r.direction());
-  float t = 0.5 * (unit_direction.y()) + 1.0;
-  return (1.0-t)*vec3(1.0,1.0,1.0) + t*vec3(0.5,0.7,1.0);
-}
+#include "vec3.h"
+#include "color.h"
 
-int main(void)
+int main()
 {
-  std::fstream fs;
-  fs.open("./dist/image.ppm", std::fstream::out);
-  
-  int nx = 200;
-  int ny = 100;
+	// Open file stream
+	std::ofstream fs("./dist/image.ppm");
 
-  fs << "P3\n" << nx << " " << ny << "\n255\n";
+	// Image
 
-  vec3 lower_left_corner(-2.0,-1.0,-1.0);
-  vec3 horizontal(4.0,0.0,0.0);
-  vec3 vertical(0.0,2.0,0.0);
-  vec3 origin(0.0,0.0,0.0);
+	int image_width = 256;
+	int image_height = 256;
 
-  for (int j = ny - 1; j >= 0; j--)
-    {
-      for (int i = 0; i < nx; i++)
+	// Render
+
+	fs << "P3\n"
+	   << image_width << ' ' << image_height << "\n255\n";
+
+	for (int j = 0; j < image_height; ++j)
 	{
-	  float u = float(i) / float(nx);
-	  float v = float(j) / float(ny);
-
-	  ray r(origin, lower_left_corner + u*horizontal + v*vertical);
-	  vec3 col = color(r); 
-
-	  int ir = int(255.99 * col[0]);
-	  int ig = int(255.99 * col[1]);
-	  int ib = int(255.99 * col[2]);
-
-	  fs << ir << " " << ig << " " << ib << "\n";
+		std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+		for (int i = 0; i < image_width; ++i)
+		{
+			auto pixel_color = color(double(i) / (image_width - 1), double(j) / (image_height - 1), 0);
+			write_color(fs, pixel_color);
+		}
 	}
-    }
 
-  fs.close();
-  return 0;
+	fs.close();
+	std::clog << "\rDone.                 \n";
+	return 0;
 }
